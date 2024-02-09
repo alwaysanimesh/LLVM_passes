@@ -1,0 +1,3 @@
+**** This doc contains some information that I learnt while exploring the LLVM Passes ****
+
+- Return type of the getName() method is "StringRef". This method returns the name of the Variable on the LHS. So if you want to store this variable name in a map for constant propagation, then use map(StringRef, int)
