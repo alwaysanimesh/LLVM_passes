@@ -1,3 +1,21 @@
 **** This doc contains some information that I learnt while exploring the LLVM Passes ****
 
 - Return type of the getName() method is "StringRef". This method returns the name of the Variable on the LHS. So if you want to store this variable name in a map for constant propagation, then use map(StringRef, int)
+
+- The `getPointerOperand()` function is a member function of the `StoreInst` class in LLVM's IR (Intermediate Representation) library. This function retrieves the pointer operand of the store instruction.
+In LLVM IR, a store instruction is used to store a value in memory. It typically has two operands:
+
+1. **Pointer Operand**: This represents the memory location (usually an address) where the value will be stored.
+2. **Value Operand**: This represents the value that will be stored into memory.
+
+For example, consider the following LLVM IR code snippet:
+
+```
+store i32 10, i32* %ptr
+```
+
+In this snippet:
+- `i32 10` is the value operand (the integer value `10`).
+- `i32* %ptr` is the pointer operand (the pointer to an integer).
+
+So, when you call `getPointerOperand()` on a `StoreInst` object, it returns the pointer operand of that store instruction.
