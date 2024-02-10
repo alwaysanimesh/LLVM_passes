@@ -1,0 +1,183 @@
+//===- Hello.cpp - Example code from "Writing an LLVM Pass" ---------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+//
+// This file implements two versions of the LLVM "Hello World" pass described
+// in docs/WritingAnLLVMPass.html
+//
+//===----------------------------------------------------------------------===//
+
+#include "llvm/ADT/Statistic.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/InstIterator.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/Pass.h"
+#include "llvm/Support/raw_ostream.h"
+#include <vector>
+#include <bits/stdc++.h>
+#include <map>
+using namespace llvm;
+using namespace std;
+
+#define DEBUG_TYPE "demo"
+
+enum lattice_symbols
+{
+  TOP = -2,
+  BOTTOM
+};
+
+STATISTIC(HelloCounter, "Counts number of functions greeted");
+// struct variable_values
+// {
+//   bool TOP,
+//   bool BOTTOM,
+//   APInt constant_value,
+
+//   variable_values(): TOP(false), BOTTOM(false){}
+// };
+
+
+namespace {
+// Hello - The first implementation, without getAnalysisUsage.
+struct Demo : public FunctionPass {
+  static char ID; // Pass identification, replacement for typeid
+  Demo() : FunctionPass(ID) {}
+  map<StringRef, APInt> variable_state;
+  queue<BasicBlock *> BB_to_execute;  // This queue stores the address of the BBs in the order they will be executed 
+  // std::map<std::string, int> VariableMap;
+
+  bool runOnFunction(Function &F) override {
+    // int number_of_ins = 0;
+    
+
+    ++HelloCounter;
+    errs() << "Demo: ";
+    errs().write_escaped(F.getName()) << '\n';
+    // for (BasicBlock &BB : F) {
+      // errs() <<"\n";
+      // errs() <<"\n";
+      // errs() << "*** New Basic Block being executed ***"<<"\n";
+      BasicBlock *startBB = &F.getEntryBlock();
+      BB_to_execute.push(startBB);
+
+      // errs() << "Successors of BasicBlock: " << startBB->getName() << "\n";
+      // for (BasicBlock *Succ : successors(startBB)) {
+      //     errs() << "  " << Succ->getName() << "\n";
+      //     BB_to_execute.push(Succ);
+      //     errs() <<" BB from the queue "<<BB_to_execute.back()->getName()<<"\n";
+      // }
+
+      while(!BB_to_execute.empty())
+      {
+        BasicBlock *front_BB = BB_to_execute.front();
+        BB_to_execute.pop();
+
+        for(BasicBlock *Succ : successors(front_BB))
+        {
+          errs() <<"Successors of this "<< front_BB->getName() <<" is : "<< Succ->getName()<<"\n";
+          BB_to_execute.push(Succ);
+        }
+        int i = 0;
+
+        for (Instruction &I : *front_BB) {
+        // errs() << "Opcode of the instruction is : " << I.getOpcodeName()<< " ";
+        // errs() << "Variable name : "<< I.getName()<<"\n"; // This gets the variable name
+        
+        // errs()<<I<<"\n";
+        errs() <<"Instr : "<<i<<" Opcode : "<<I.getOpcodeName()<<"\n";
+        i++;
+
+        /* Processing Store Instructions */
+        if (StoreInst *Store = dyn_cast<StoreInst>(&I))  
+        {
+          Value *StoredValue = Store->getValueOperand();  // gets the Operand value 
+          auto *Var = dyn_cast<AllocaInst>(Store->getPointerOperand());  //this fetches the address where the variable has been stored
+          errs()<<"Variable in which the store will happen: "<<Var->getName()<<"\n"; // Here, we get the name of the variable from the address fetched above
+
+          if (ConstantInt *ConstantValue = dyn_cast<ConstantInt>(StoredValue)) {  // Initially, the operand value was in hex, but we need to change in integer
+            errs() << "Constant value in store instruction: "<< ConstantValue->getValue() << "\n"; // This gives the constant Integer value
+
+            /* Here, we store the variable and the value assigned to it*/
+            variable_state[Var->getName()] = ConstantValue->getValue();
+            errs() <<"Key : "<< Var->getName() <<" Value : "<< variable_state[Var->getName()]<<"\n";
+            errs() << I << " --> %" << Var->getName() <<" = "<<variable_state[Var->getName()]<<"\n";
+
+
+          }
+        } 
+        /* Processing Alloca Instructions */
+          else if (AllocaInst *Alloca = dyn_cast<AllocaInst>(&I)) {
+            errs()<<"This is the Variable on RHS : "<<Alloca->getName()<<"\n";
+            variable_state[Alloca->getName()] = TOP ;
+          
+            errs() <<"Key : "<< Alloca->getName() <<" Value : "<< variable_state[Alloca->getName()]<<"\n";
+
+            errs() << I << " --> %" << Alloca->getName() <<" = TOP"<<"\n";
+
+        }
+
+        /* Processing Load instructions */
+
+        else if(LoadInst *Load = dyn_cast<LoadInst>(&I))
+        {
+          Value *LoadedValue = Load->getPointerOperand();
+          auto *Var = dyn_cast<AllocaInst>(LoadedValue);
+          // Value *ResultValue = &I;
+
+          // errs() << "Variable on which load will happen: " <<I.getName()<< "\n";
+          // errs() << "Loaded Value: " << LoadedValue->getName() << "\n";
+          Value *destination = &I;
+          Value *ptrOperand = Load->getPointerOperand();
+          auto *ptrArg = dyn_cast<Argument>(ptrOperand);
+          errs() << "Load operation on variable in function : " <<I.getNameOrAsOperand() << "\n";
+          errs() << "Loaded Value: " << LoadedValue->getName() << "\n";
+
+          variable_state[I.getNameOrAsOperand()] = variable_state[LoadedValue->getName()];
+          errs() << "Value that I want is : "<< variable_state[I.getNameOrAsOperand()] <<"\n";
+
+        }
+
+        /* Processing the Call Instructions */
+        else if(CallInst *Call = dyn_cast<CallInst>(&I))
+        {
+          /* If the function is scanf, then we assign value as bottom to the variable passed to it*/
+          /* If the function is printf, then we ignore it */
+          Function *calledFunction = Call->getCalledFunction();
+          errs()<< "Name of the function is : "<< calledFunction->getName()<<"\n";
+          if (calledFunction->getName() == "__isoc99_scanf")
+          {
+            errs()<<"Variable on which scanf was called : "<<(Call->getArgOperand(1))->getName()<<"\n";  // Here, Call->getArgOperand(1) will return the address of the 1st arg of the Scanf function, then we get the name of that address using "getName()" function
+            variable_state[(Call->getArgOperand(1))->getName()] = TOP;
+            errs() << "Key : "<< (Call->getArgOperand(1))->getName() << " Value : "<<variable_state[(Call->getArgOperand(1))->getName()] <<"\n";
+            errs() << I << " --> %" << (Call->getArgOperand(1))->getName() <<" = TOP"<<"\n";
+          }
+
+          
+
+          
+        }
+      }
+
+
+
+      }
+    
+
+
+
+      
+    
+    
+
+    return false;
+  }
+};
+} // namespace
+
+char Demo::ID = 0;
+static RegisterPass<Demo> X("demo", "This is a Demo pass");
