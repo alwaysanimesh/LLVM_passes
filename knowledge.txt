@@ -19,3 +19,9 @@ In this snippet:
 - `i32* %ptr` is the pointer operand (the pointer to an integer).
 
 So, when you call `getPointerOperand()` on a `StoreInst` object, it returns the pointer operand of that store instruction.
+
+
+
+- In Branch instruction, the variable on which the Comparison will take place is the 0th operand, then 1st operand is the label to match
+  when the condition is True and 2nd operand is the label to match when the condition is false.
+  >> If the Branch instruction is unconditional, then there will be just one operand.
