@@ -25,3 +25,8 @@ So, when you call `getPointerOperand()` on a `StoreInst` object, it returns the 
 - In Branch instruction, the variable on which the Comparison will take place is the 0th operand, then 1st operand is the label to match
   when the condition is True and 2nd operand is the label to match when the condition is false.
   >> If the Branch instruction is unconditional, then there will be just one operand.
+
+
+- TOP : This is used when some variable is uninitialized. Example: Varibales in Alloca instructions will have TOP as value.
+- BOTTOM : This is used to represent variable which have some value, but we can't gaurantee that the value is constant. 
+           Example: Scanf() instructions 
