@@ -30,3 +30,7 @@ So, when you call `getPointerOperand()` on a `StoreInst` object, it returns the 
 - TOP : This is used when some variable is uninitialized. Example: Varibales in Alloca instructions will have TOP as value.
 - BOTTOM : This is used to represent variable which have some value, but we can't gaurantee that the value is constant. 
            Example: Scanf() instructions 
+
+
+
+- Path of the build directory: /home/c310/ipaco/llvm-project/build
