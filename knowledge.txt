@@ -34,8 +34,16 @@ So, when you call `getPointerOperand()` on a `StoreInst` object, it returns the 
 ###################################################################################################################################################################################################
 Commands to run a pass:
 ###################################################################################################################################################################################################
+1. Create a new folder in : /home/c310/ipaco/llvm-project/llvm/lib/Transforms, Make changes to the .cpp file regarding the pass
+Note: static RegisterPass<alias> X("alias", "This pass performs pointer analysis");  >> Here, "alias"(X("alias"<<This one)) will be the name of the pass, as we have registered this pass by this name.
+
+2. Add the details of the pass in the "CMakeLists.txt" file of /home/c310/ipaco/llvm-project/llvm/lib/Transforms
+
+3. Run the "make -j" command in /home/c310/ipaco/llvm-project/build/lib/Transforms folder to get the .SO file related to the pass.
+
+4. Command to run the pass: 
 - /home/c310/ipaco/llvm-project/build/bin/opt -enable-new-pm=0 -load /home/c310/ipaco/llvm-project/build/lib/LLVMDemo.so -demo file1.ll : This command was executed where the .ll file was present
 
 
-
+Extra: 
 - Path of the build directory: /home/c310/ipaco/llvm-project/build
