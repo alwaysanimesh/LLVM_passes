@@ -1,5 +1,25 @@
 **** This doc contains some information that I learnt while exploring the LLVM Passes ****
 
+###################################################################################################################################################################################################
+Commands to run a pass:
+###################################################################################################################################################################################################
+1. Create a new folder in : /home/c310/ipaco/llvm-project/llvm/lib/Transforms, Make changes to the .cpp file regarding the pass
+Note: static RegisterPass<alias> X("alias", "This pass performs pointer analysis");  >> Here, "alias"(X("alias"<<This one)) will be the name of the pass, as we have registered this pass by this name.
+
+2. Add the details of the pass in the "CMakeLists.txt" file of /home/c310/ipaco/llvm-project/llvm/lib/Transforms
+
+3. Run the "make -j" command in /home/c310/ipaco/llvm-project/build/lib/Transforms folder to get the .SO file related to the pass.
+
+4. Command to run the pass: 
+- /home/c310/ipaco/llvm-project/build/bin/opt -enable-new-pm=0 -load /home/c310/ipaco/llvm-project/build/lib/LLVMDemo.so -demo file1.ll : This command was executed where the .ll file was present
+
+
+Extra: 
+- Path of the build directory: /home/c310/ipaco/llvm-project/build
+
+###################################################################################################################################################################################################
+###################################################################################################################################################################################################
+
 - Return type of the getName() method is "StringRef". This method returns the name of the Variable on the LHS. So if you want to store this variable name in a map for constant propagation, then use map(StringRef, int)
 
 - The `getPointerOperand()` function is a member function of the `StoreInst` class in LLVM's IR (Intermediate Representation) library. This function retrieves the pointer operand of the store instruction.
@@ -31,19 +51,3 @@ So, when you call `getPointerOperand()` on a `StoreInst` object, it returns the 
 - BOTTOM : This is used to represent variable which have some value, but we can't gaurantee that the value is constant. 
            Example: Scanf() instructions 
 
-###################################################################################################################################################################################################
-Commands to run a pass:
-###################################################################################################################################################################################################
-1. Create a new folder in : /home/c310/ipaco/llvm-project/llvm/lib/Transforms, Make changes to the .cpp file regarding the pass
-Note: static RegisterPass<alias> X("alias", "This pass performs pointer analysis");  >> Here, "alias"(X("alias"<<This one)) will be the name of the pass, as we have registered this pass by this name.
-
-2. Add the details of the pass in the "CMakeLists.txt" file of /home/c310/ipaco/llvm-project/llvm/lib/Transforms
-
-3. Run the "make -j" command in /home/c310/ipaco/llvm-project/build/lib/Transforms folder to get the .SO file related to the pass.
-
-4. Command to run the pass: 
-- /home/c310/ipaco/llvm-project/build/bin/opt -enable-new-pm=0 -load /home/c310/ipaco/llvm-project/build/lib/LLVMDemo.so -demo file1.ll : This command was executed where the .ll file was present
-
-
-Extra: 
-- Path of the build directory: /home/c310/ipaco/llvm-project/build
