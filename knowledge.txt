@@ -31,6 +31,11 @@ So, when you call `getPointerOperand()` on a `StoreInst` object, it returns the 
 - BOTTOM : This is used to represent variable which have some value, but we can't gaurantee that the value is constant. 
            Example: Scanf() instructions 
 
+###################################################################################################################################################################################################
+Commands to run a pass:
+###################################################################################################################################################################################################
+- /home/c310/ipaco/llvm-project/build/bin/opt -enable-new-pm=0 -load /home/c310/ipaco/llvm-project/build/lib/LLVMDemo.so -demo file1.ll : This command was executed where the .ll file was present
+
 
 
 - Path of the build directory: /home/c310/ipaco/llvm-project/build
